@@ -472,6 +472,10 @@ export default function App() {
     <main className="min-h-screen bg-transparent text-white font-sans selection:bg-neon-green selection:text-black">
       <MatrixRain />
       <style>{`
+        /* Reduce CLS */
+        img { content-visibility: auto; }
+        .relative { contain: layout; }
+        
         .glitch-btn { position: relative; }
         .glitch-btn:hover { animation: glitch-skew 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite; }
         .glitch-btn::before, .glitch-btn::after {
@@ -555,6 +559,8 @@ export default function App() {
           <button
             className="md:hidden text-white hover:text-neon-green transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu de navegação"}
+            aria-expanded={isMenuOpen}
           >
             {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
@@ -604,15 +610,15 @@ export default function App() {
             transition={{ duration: 0.8 }}
             className="max-w-3xl"
           >
-            <h2 className="text-neon-green font-mono text-sm md:text-base mb-4 tracking-wider uppercase">
+            <p className="text-neon-green font-mono text-sm md:text-base mb-4 tracking-wider uppercase">
               Olá, eu sou
-            </h2>
+            </p>
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter mb-6 leading-tight">
               Alejandro Alexandre<br className="hidden md:block" /> Vilauba Coenio
             </h1>
-            <h3 className="text-lg md:text-2xl lg:text-3xl text-gray-400 font-medium mb-8 cursor-default">
+            <h2 className="text-lg md:text-2xl lg:text-3xl text-gray-400 font-medium mb-8 cursor-default">
               <ScrambleText text="Desenvolvedor de Sistemas" /> <span className="text-neon-green">|</span> <ScrambleText text="Suporte Técnico & Redes" /> <span className="text-neon-green">|</span> <ScrambleText text="Editor de Vídeo" />
-            </h3>
+            </h2>
             <p className="text-base md:text-lg text-gray-400 mb-10 max-w-2xl leading-relaxed cursor-default">
               <ScrambleText text="Transformando lógica em código, ideias em vídeos e peças em máquinas de alto desempenho. Estudante de Análise e Desenvolvimento de Sistemas." />
             </p>
@@ -653,6 +659,8 @@ export default function App() {
                   <img loading="lazy"
                     src="/Foto.jpg"
                     alt="Alejandro Alexandre Vilauba Coenio"
+                    width="600"
+                    height="600"
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                     referrerPolicy="no-referrer"
                   />
@@ -859,7 +867,7 @@ export default function App() {
             <h2 className="text-neon-green font-mono text-lg mb-4 tracking-wider uppercase">
               <ScrambleText text="04. Qual o próximo passo?" continuous={false} />
             </h2>
-            <h3 className="text-3xl md:text-6xl font-bold mb-8"><ScrambleText text="Entrar em Contato" continuous={false} /></h3>
+            <h2 className="text-3xl md:text-6xl font-bold mb-8"><ScrambleText text="Entrar em Contato" continuous={false} /></h2>
             <p className="text-gray-400 text-base md:text-lg mb-12 max-w-2xl mx-auto">
               <ScrambleText text="Estou sempre aberto a novas oportunidades, seja para um estágio na área de tecnologia, projetos freelance de desenvolvimento, infraestrutura ou edição de vídeo. Minha caixa de entrada está sempre aberta!" continuous={false} />
             </p>

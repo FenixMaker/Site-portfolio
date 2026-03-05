@@ -1,7 +1,4 @@
 ﻿User-agent: *
 Allow: /
-Disallow: /node_modules/
-Disallow: /.git/
-Disallow: /dist/
 
-Sitemap: https://site-portfolio-fenix.netlify.app/sitemap.xml
+Sitemap: https://fenixposts.com.br/sitemap.xml
