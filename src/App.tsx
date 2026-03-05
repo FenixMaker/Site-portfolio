@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Github, Linkedin, Youtube, Mail, Phone, MapPin, Menu, X, ExternalLink, Code, Server, Video, MonitorPlay, Cpu, ArrowUp } from 'lucide-react';
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useInView, useScroll } from 'motion/react';
+import { m, LazyMotion, domAnimation, AnimatePresence, useMotionValue, useSpring, useTransform, useInView, useScroll } from 'motion/react';
 
 // --- Dados do Portfólio ---
 const portfolioProjects = [
@@ -84,41 +84,74 @@ const MatrixRain = () => {
 
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
-
-    const columns = Math.floor(width / 20) + 1;
+    
+    // Performance: Detectar dispositivo móvel
+    const isMobile = window.innerWidth < 768;
+    // Em mobile, aumentar o espaçamento das colunas para reduzir processamento
+    const fontSize = isMobile ? 18 : 14; 
+    const columns = Math.floor(width / (fontSize * 1.5)) + 1; // Menos colunas
     const yPositions = Array.from({ length: columns }).fill(0) as number[];
 
-    const matrix = () => {
-      ctx.fillStyle = 'rgba(5, 5, 5, 0.1)';
+    // Performance: Controle de FPS
+    let animationFrameId: number;
+    let lastTime = 0;
+    const fps = isMobile ? 15 : 30; // Reduzir FPS em mobile
+    const interval = 1000 / fps;
+
+    const matrix = (currentTime: number) => {
+      animationFrameId = requestAnimationFrame(matrix);
+
+      if (currentTime - lastTime < interval) return;
+      lastTime = currentTime;
+
+      // Efeito de fade mais suave e performático
+      ctx.fillStyle = 'rgba(5, 5, 5, 0.1)'; 
       ctx.fillRect(0, 0, width, height);
 
       ctx.fillStyle = '#00ff00';
-      ctx.font = '14pt monospace';
+      ctx.font = `${fontSize}pt monospace`;
 
       yPositions.forEach((y, index) => {
+        // Reduzir probabilidade de queda em mobile para menos atualizações de texto
+        if (isMobile && Math.random() > 0.5) return;
+
         const text = String.fromCharCode(0x30A0 + Math.random() * 96);
-        const x = index * 20;
+        const x = index * (fontSize * 1.5);
         ctx.fillText(text, x, y);
 
         if (y > 100 + Math.random() * 10000) {
           yPositions[index] = 0;
         } else {
-          yPositions[index] = y + 20;
+          yPositions[index] = y + fontSize + 6;
         }
       });
     };
 
-    const interval = setInterval(matrix, 300); // Reduced from 50ms to 300ms for performance
+    // Iniciar animação
+    animationFrameId = requestAnimationFrame(matrix);
 
     const handleResize = () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
     };
+    
+    // Performance: Pausar quando não estiver visível
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(animationFrameId);
+      } else {
+        lastTime = performance.now();
+        animationFrameId = requestAnimationFrame(matrix);
+      }
+    };
 
     window.addEventListener('resize', handleResize);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
     return () => {
-      clearInterval(interval);
+      cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
@@ -160,7 +193,7 @@ const ScrambleText = ({ text, className, continuous = false }: { text: string; c
   };
 
   useEffect(() => {
-    if (isInView) {
+    if (isInView && !document.hidden) {
       triggerScramble();
     }
   }, [isInView]);
@@ -172,7 +205,9 @@ const ScrambleText = ({ text, className, continuous = false }: { text: string; c
     const startLoop = () => {
       const randomDelay = Math.floor(Math.random() * 7000) + 8000; // Entre 8s e 15s
       loopRef.current = setTimeout(() => {
-        triggerScramble();
+        if (!document.hidden) {
+          triggerScramble();
+        }
         startLoop(); // Chama novamente para o próximo ciclo
       }, randomDelay);
     };
@@ -237,7 +272,7 @@ const ProjectCard = ({ project, index }: { project: any; index: number; key?: Re
   };
 
   return (
-    <motion.div
+    <m.div
       ref={ref}
       layout
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -265,7 +300,7 @@ const ProjectCard = ({ project, index }: { project: any; index: number; key?: Re
           ></iframe>
         ) : (
           <>
-            <motion.img loading="lazy"
+            <m.img loading="lazy"
               width="800"
               height="600"
               style={{ 
@@ -328,7 +363,7 @@ const ProjectCard = ({ project, index }: { project: any; index: number; key?: Re
           </a>
         )}
       </div>
-    </motion.div>
+    </m.div>
   );
 };
 
@@ -418,8 +453,9 @@ export default function App() {
   ];
 
   return (
-    <main className="min-h-screen bg-transparent text-white font-sans selection:bg-neon-green selection:text-black">
-      <MatrixRain />
+    <LazyMotion features={domAnimation}>
+      <main className="min-h-screen bg-transparent text-white font-sans selection:bg-neon-green selection:text-black">
+        <MatrixRain />
       <style>{`
         /* Minimal CSS for maximum CLS prevention */
         * { box-sizing: border-box; }
@@ -526,7 +562,7 @@ export default function App() {
         {/* Menu Mobile */}
         <AnimatePresence mode="wait">
           {isMenuOpen && (
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -549,7 +585,7 @@ export default function App() {
                   </a>
                 ))}
               </div>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </nav>
@@ -601,7 +637,7 @@ export default function App() {
       <section id="sobre" className="py-16 md:py-24 bg-dark-surface/80 backdrop-blur-sm relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           <div className="flex flex-col md:flex-row gap-12 md:gap-16 items-center">
-            <motion.div
+            <m.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -624,9 +660,9 @@ export default function App() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </m.div>
 
-            <motion.div
+            <m.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -644,7 +680,7 @@ export default function App() {
                   <ScrambleText text="Tenho experiência técnica em hardware, redes e suporte, além de domínio em ferramentas de edição de vídeo. Destaco-me pela facilidade de aprendizado autodidata e resolução de problemas." continuous={false} />
                 </p>
               </div>
-            </motion.div>
+            </m.div>
           </div>
         </div>
       </section>
@@ -652,7 +688,7 @@ export default function App() {
       {/* Habilidades */}
       <section id="habilidades" className="py-16 md:py-24 relative">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -661,31 +697,31 @@ export default function App() {
             <h2 className="text-3xl md:text-5xl font-bold flex items-center gap-4">
               <span className="text-neon-green font-mono text-xl"><ScrambleText text="02." continuous={false} /></span> <ScrambleText text="Habilidades" continuous={false} />
             </h2>
-          </motion.div>
+          </m.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Desenvolvimento */}
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
               className="bg-dark-surface p-8 border border-white/5 hover:border-neon-green/50 transition-colors group"
             >
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, scale: 0.5, rotate: -45 }}
                 whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
                 viewport={{ once: true }}
                 transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
               >
-                <motion.div
+                <m.div
                   animate={{ y: [0, -5, 0] }}
                   transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
                   className="inline-block"
                 >
                   <Code className="w-12 h-12 text-neon-green mb-6 drop-shadow-[0_0_8px_rgba(0,255,0,0.5)] group-hover:scale-125 group-hover:rotate-12 group-hover:drop-shadow-[0_0_20px_rgba(0,255,0,1)] transition-all duration-300" />
-                </motion.div>
-              </motion.div>
+                </m.div>
+              </m.div>
               <h3 className="text-2xl font-bold mb-6"><ScrambleText text="Desenvolvimento" continuous={false} /></h3>
               <div className="flex flex-wrap gap-3">
                 {['Lógica de Programação', 'Estrutura de Dados', 'SQL', 'Python', 'Next.js'].map((skill) => (
@@ -694,30 +730,30 @@ export default function App() {
                   </span>
                 ))}
               </div>
-            </motion.div>
+            </m.div>
 
             {/* Infraestrutura e TI */}
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
               className="bg-dark-surface p-8 border border-white/5 hover:border-neon-green/50 transition-colors group"
             >
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, scale: 0.5, y: 20 }}
                 whileInView={{ opacity: 1, scale: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
               >
-                <motion.div
+                <m.div
                   animate={{ y: [0, -5, 0] }}
                   transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 0.5, repeatDelay: 1 }}
                   className="inline-block"
                 >
                   <Server className="w-12 h-12 text-neon-green mb-6 drop-shadow-[0_0_8px_rgba(0,255,0,0.5)] group-hover:scale-125 group-hover:-rotate-12 group-hover:drop-shadow-[0_0_20px_rgba(0,255,0,1)] transition-all duration-300" />
-                </motion.div>
-              </motion.div>
+                </m.div>
+              </m.div>
               <h3 className="text-2xl font-bold mb-6"><ScrambleText text="Infraestrutura e TI" continuous={false} /></h3>
               <div className="flex flex-wrap gap-3">
                 {['Montagem e Manutenção', 'Diagnóstico de Hardware', 'Redes Locais', 'Wi-Fi e Roteadores', 'Suporte Técnico Presencial', 'Resolução de Conectividade'].map((skill) => (
@@ -726,30 +762,30 @@ export default function App() {
                   </span>
                 ))}
               </div>
-            </motion.div>
+            </m.div>
 
             {/* Audiovisual */}
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
               className="bg-dark-surface p-8 border border-white/5 hover:border-neon-green/50 transition-colors group"
             >
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, scale: 0.5, x: -20 }}
                 whileInView={{ opacity: 1, scale: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ type: "spring", stiffness: 200, delay: 0.4 }}
               >
-                <motion.div
+                <m.div
                   animate={{ y: [0, -5, 0] }}
                   transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1, repeatDelay: 1 }}
                   className="inline-block"
                 >
                   <Video className="w-12 h-12 text-neon-green mb-6 drop-shadow-[0_0_8px_rgba(0,255,0,0.5)] group-hover:scale-125 group-hover:rotate-6 group-hover:drop-shadow-[0_0_20px_rgba(0,255,0,1)] transition-all duration-300" />
-                </motion.div>
-              </motion.div>
+                </m.div>
+              </m.div>
               <h3 className="text-2xl font-bold mb-6"><ScrambleText text="Audiovisual" continuous={false} /></h3>
               <div className="flex flex-wrap gap-3">
                 {['Edição Profissional', 'YouTube', 'Ritmos de Corte', 'Engajamento', 'Criação de Conteúdo', 'Pós-produção'].map((skill) => (
@@ -758,7 +794,7 @@ export default function App() {
                   </span>
                 ))}
               </div>
-            </motion.div>
+            </m.div>
           </div>
         </div>
       </section>
@@ -766,7 +802,7 @@ export default function App() {
       {/* Portfólio */}
       <section id="portfolio" className="py-16 md:py-24 bg-dark-surface/80 backdrop-blur-sm relative">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -798,23 +834,23 @@ export default function App() {
                 </button>
               ))}
             </div>
-          </motion.div>
+          </m.div>
 
           {/* Galeria */}
-          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <m.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <AnimatePresence mode="popLayout">
               {filteredProjects.map((project, index) => (
                 <ProjectCard key={project.id} project={project} index={index} />
               ))}
             </AnimatePresence>
-          </motion.div>
+          </m.div>
         </div>
       </section>
 
       {/* Contato (Rodapé) */}
       <footer id="contato" className="py-16 md:py-24 relative border-t border-white/10">
         <div className="max-w-4xl mx-auto px-6 md:px-12 text-center">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -873,14 +909,14 @@ export default function App() {
             <p className="text-gray-600 font-mono text-sm">
               Desenvolvido por Alejandro Alexandre Vilauba Coenio &copy; {new Date().getFullYear()}
             </p>
-          </motion.div>
+          </m.div>
         </div>
       </footer>
 
       {/* Botão Voltar ao Topo */}
       <AnimatePresence>
         {scrolled && (
-          <motion.button
+          <m.button
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
@@ -889,9 +925,10 @@ export default function App() {
             aria-label="Voltar ao topo"
           >
             <ArrowUp size={24} />
-          </motion.button>
+          </m.button>
         )}
       </AnimatePresence>
-    </main>
+      </main>
+    </LazyMotion>
   );
 }
