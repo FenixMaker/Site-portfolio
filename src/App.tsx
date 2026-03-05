@@ -311,6 +311,8 @@ const ProjectCard = ({ project, index }: { project: any; index: number; key?: Re
         {project.type !== 'video' ? (
           <a
             href={project.link}
+            target={project.link.startsWith('http') ? "_blank" : undefined}
+            rel={project.link.startsWith('http') ? "noopener noreferrer" : undefined}
             className="inline-flex items-center gap-2 text-sm font-mono text-white hover:text-neon-green transition-colors mt-auto"
           >
             Ver Detalhes <ExternalLink size={16} />
@@ -559,10 +561,8 @@ export default function App() {
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] -z-10"></div>
 
         <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+          {/* LCP Optimization: Removido initial/animate para renderização imediata do conteúdo principal */}
+          <div
             className="max-w-3xl"
           >
             <p className="text-neon-green font-mono text-sm md:text-base mb-4 tracking-wider uppercase">
@@ -593,7 +593,7 @@ export default function App() {
                 <span className="relative z-10">Entrar em Contato</span>
               </a>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
