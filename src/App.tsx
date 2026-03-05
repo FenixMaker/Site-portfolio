@@ -108,7 +108,7 @@ const MatrixRain = () => {
       });
     };
 
-    const interval = setInterval(matrix, 50);
+    const interval = setInterval(matrix, 300); // Reduced from 50ms to 300ms for performance
 
     const handleResize = () => {
       width = canvas.width = window.innerWidth;
@@ -179,7 +179,7 @@ const MiniMatrixRain = () => {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />;
+  return null; // Disabled for performance to reduce CLS
 };
 
 const ScrambleText = ({ text, className, continuous = true }: { text: string; className?: string; continuous?: boolean }) => {
@@ -321,6 +321,8 @@ const ProjectCard = ({ project, index }: { project: any; index: number; key?: Re
         ) : (
           <>
             <motion.img loading="lazy"
+              width="800"
+              height="600"
               style={{ 
                 x: mouseTranslateX, 
                 y: scrollTranslateY,
@@ -472,21 +474,17 @@ export default function App() {
     <main className="min-h-screen bg-transparent text-white font-sans selection:bg-neon-green selection:text-black">
       <MatrixRain />
       <style>{`
-        /* Aggressive CLS prevention */
+        /* Minimal CSS for maximum CLS prevention */
         * { box-sizing: border-box; }
-        img { content-visibility: auto; }
         
-        /* Contain layout shifts */
-        section { contain: layout style; }
-        .relative { contain: layout paint; }
+        /* GPU acceleration */
+        img { transform: translateZ(0); backface-visibility: hidden; }
         
-        /* Prevent canvas from causing shifts */
-        canvas { position: fixed !important; will-change: auto; }
+        /* Fixed canvas */
+        canvas { position: fixed !important; pointer-events: none !important; }
         
-        /* Reduce animation impact */
-        @media (prefers-reduced-motion: reduce) {
-          *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
-        }
+        /* Prevent layout shifts */
+        .aspect-square { aspect-ratio: 1 / 1; }
         
         .glitch-btn { position: relative; }
         .glitch-btn:hover { animation: glitch-skew 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite; }
@@ -665,7 +663,7 @@ export default function App() {
               transition={{ duration: 0.6 }}
               className="w-full md:w-1/2 px-4 md:px-0"
             >
-              <div className="relative aspect-square max-w-md mx-auto group" style={{aspectRatio: "1/1"}}>
+              <div className="relative aspect-square max-w-md mx-auto group">
                 <div className="absolute inset-0 border-2 border-neon-green translate-x-3 translate-y-3 md:translate-x-4 md:translate-y-4 -z-10 transition-transform duration-500 group-hover:translate-x-5 group-hover:translate-y-5 md:group-hover:translate-x-6 md:group-hover:translate-y-6"></div>
                 <div className="relative w-full h-full overflow-hidden">
                   <img loading="lazy"
