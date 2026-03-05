@@ -122,7 +122,7 @@ const MatrixRain = () => {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="fixed inset-0 z-[-1] opacity-15 pointer-events-none" />;
+  return <canvas ref={canvasRef} className="fixed inset-0 z-[-1] opacity-5 pointer-events-none" />;
 };
 
 const MiniMatrixRain = () => {
@@ -472,9 +472,21 @@ export default function App() {
     <main className="min-h-screen bg-transparent text-white font-sans selection:bg-neon-green selection:text-black">
       <MatrixRain />
       <style>{`
-        /* Reduce CLS */
+        /* Aggressive CLS prevention */
+        * { box-sizing: border-box; }
         img { content-visibility: auto; }
-        .relative { contain: layout; }
+        
+        /* Contain layout shifts */
+        section { contain: layout style; }
+        .relative { contain: layout paint; }
+        
+        /* Prevent canvas from causing shifts */
+        canvas { position: fixed !important; will-change: auto; }
+        
+        /* Reduce animation impact */
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+        }
         
         .glitch-btn { position: relative; }
         .glitch-btn:hover { animation: glitch-skew 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite; }
@@ -653,7 +665,7 @@ export default function App() {
               transition={{ duration: 0.6 }}
               className="w-full md:w-1/2 px-4 md:px-0"
             >
-              <div className="relative aspect-square max-w-md mx-auto group">
+              <div className="relative aspect-square max-w-md mx-auto group" style={{aspectRatio: "1/1"}}>
                 <div className="absolute inset-0 border-2 border-neon-green translate-x-3 translate-y-3 md:translate-x-4 md:translate-y-4 -z-10 transition-transform duration-500 group-hover:translate-x-5 group-hover:translate-y-5 md:group-hover:translate-x-6 md:group-hover:translate-y-6"></div>
                 <div className="relative w-full h-full overflow-hidden">
                   <img loading="lazy"
@@ -725,7 +737,7 @@ export default function App() {
               >
                 <motion.div
                   animate={{ y: [0, -5, 0] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
                   className="inline-block"
                 >
                   <Code className="w-12 h-12 text-neon-green mb-6 drop-shadow-[0_0_8px_rgba(0,255,0,0.5)] group-hover:scale-125 group-hover:rotate-12 group-hover:drop-shadow-[0_0_20px_rgba(0,255,0,1)] transition-all duration-300" />
@@ -757,7 +769,7 @@ export default function App() {
               >
                 <motion.div
                   animate={{ y: [0, -5, 0] }}
-                  transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                  transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 0.5, repeatDelay: 1 }}
                   className="inline-block"
                 >
                   <Server className="w-12 h-12 text-neon-green mb-6 drop-shadow-[0_0_8px_rgba(0,255,0,0.5)] group-hover:scale-125 group-hover:-rotate-12 group-hover:drop-shadow-[0_0_20px_rgba(0,255,0,1)] transition-all duration-300" />
@@ -789,7 +801,7 @@ export default function App() {
               >
                 <motion.div
                   animate={{ y: [0, -5, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1, repeatDelay: 1 }}
                   className="inline-block"
                 >
                   <Video className="w-12 h-12 text-neon-green mb-6 drop-shadow-[0_0_8px_rgba(0,255,0,0.5)] group-hover:scale-125 group-hover:rotate-6 group-hover:drop-shadow-[0_0_20px_rgba(0,255,0,1)] transition-all duration-300" />
