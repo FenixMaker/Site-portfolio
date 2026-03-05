@@ -320,7 +320,7 @@ const ProjectCard = ({ project, index }: { project: any; index: number; key?: Re
           ></iframe>
         ) : (
           <>
-            <motion.img
+            <motion.img loading="lazy"
               style={{ 
                 x: mouseTranslateX, 
                 y: scrollTranslateY,
@@ -469,7 +469,7 @@ export default function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-transparent text-white font-sans selection:bg-neon-green selection:text-black">
+    <main className="min-h-screen bg-transparent text-white font-sans selection:bg-neon-green selection:text-black">
       <MatrixRain />
       <style>{`
         .glitch-btn { position: relative; }
@@ -650,7 +650,7 @@ export default function App() {
               <div className="relative aspect-square max-w-md mx-auto group">
                 <div className="absolute inset-0 border-2 border-neon-green translate-x-3 translate-y-3 md:translate-x-4 md:translate-y-4 -z-10 transition-transform duration-500 group-hover:translate-x-5 group-hover:translate-y-5 md:group-hover:translate-x-6 md:group-hover:translate-y-6"></div>
                 <div className="relative w-full h-full overflow-hidden">
-                  <img
+                  <img loading="lazy"
                     src="/Foto.jpg"
                     alt="Alejandro Alexandre Vilauba Coenio"
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
@@ -819,6 +819,7 @@ export default function App() {
                 <button
                   key={category}
                   onClick={() => setActiveCategory(category)}
+                  aria-label={`Filtrar por ${category}`}
                   className={`px-4 py-2 md:px-6 md:py-2 text-xs md:text-sm font-mono transition-all duration-300 flex items-center gap-2 ${
                     activeCategory === category
                       ? 'bg-neon-green text-black font-bold'
@@ -928,6 +929,6 @@ export default function App() {
           </motion.button>
         )}
       </AnimatePresence>
-    </div>
+    </main>
   );
 }
