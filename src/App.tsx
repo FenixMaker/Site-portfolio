@@ -255,7 +255,7 @@ const ProjectCard = ({ project, index }: { project: any; index: number; key?: Re
           <iframe
             width="100%"
             height="100%"
-            src={`https://www.youtube.com/embed/${project.embedId}`}
+            src={`https://www.youtube-nocookie.com/embed/${project.embedId}`}
             title={project.title}
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -572,10 +572,10 @@ export default function App() {
               Alejandro Alexandre<br className="hidden md:block" /> Vilauba Coenio
             </h1>
             <h2 className="text-lg md:text-2xl lg:text-3xl text-gray-400 font-medium mb-8 cursor-default">
-              <ScrambleText text="Desenvolvedor de Sistemas" /> <span className="text-neon-green">|</span> <ScrambleText text="Suporte Técnico & Redes" /> <span className="text-neon-green">|</span> <ScrambleText text="Editor de Vídeo" />
+              Desenvolvedor de Sistemas <span className="text-neon-green">|</span> Suporte Técnico & Redes <span className="text-neon-green">|</span> Editor de Vídeo
             </h2>
             <p className="text-base md:text-lg text-gray-400 mb-10 max-w-2xl leading-relaxed cursor-default">
-              <ScrambleText text="Transformando lógica em código, ideias em vídeos e peças em máquinas de alto desempenho. Estudante de Análise e Desenvolvimento de Sistemas." />
+              Transformando lógica em código, ideias em vídeos e peças em máquinas de alto desempenho. Estudante de Análise e Desenvolvimento de Sistemas.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <a
