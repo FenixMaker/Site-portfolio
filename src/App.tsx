@@ -125,64 +125,9 @@ const MatrixRain = () => {
   return <canvas ref={canvasRef} className="fixed inset-0 z-[-1] opacity-5 pointer-events-none" />;
 };
 
-const MiniMatrixRain = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const MiniMatrixRain = () => null;
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let width = 0;
-    let height = 0;
-    let columns = 0;
-    let yPositions: number[] = [];
-
-    const handleResize = () => {
-      if (canvas.parentElement) {
-        width = canvas.width = canvas.parentElement.clientWidth;
-        height = canvas.height = canvas.parentElement.clientHeight;
-        columns = Math.floor(width / 20) + 1;
-        yPositions = Array.from({ length: columns }).fill(0) as number[];
-      }
-    };
-
-    handleResize();
-
-    const matrix = () => {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-      ctx.fillRect(0, 0, width, height);
-
-      ctx.fillStyle = '#00ff00';
-      ctx.font = '14pt monospace';
-
-      yPositions.forEach((y, index) => {
-        const text = String.fromCharCode(0x30A0 + Math.random() * 96);
-        const x = index * 20;
-        ctx.fillText(text, x, y);
-
-        if (y > 100 + Math.random() * 10000) {
-          yPositions[index] = 0;
-        } else {
-          yPositions[index] = y + 20;
-        }
-      });
-    };
-
-    const interval = setInterval(matrix, 50);
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  return null; // Disabled for performance to reduce CLS
-};
-
-const ScrambleText = ({ text, className, continuous = true }: { text: string; className?: string; continuous?: boolean }) => {
+const ScrambleText = ({ text, className, continuous = false }: { text: string; className?: string; continuous?: boolean }) => {
   const [iteration, setIteration] = useState(text.length);
   const [scrambledChars, setScrambledChars] = useState<string[]>([]);
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
@@ -741,7 +686,7 @@ export default function App() {
                   <Code className="w-12 h-12 text-neon-green mb-6 drop-shadow-[0_0_8px_rgba(0,255,0,0.5)] group-hover:scale-125 group-hover:rotate-12 group-hover:drop-shadow-[0_0_20px_rgba(0,255,0,1)] transition-all duration-300" />
                 </motion.div>
               </motion.div>
-              <h3 className="text-2xl font-bold mb-6"><ScrambleText text="Desenvolvimento" continuous={true} /></h3>
+              <h3 className="text-2xl font-bold mb-6"><ScrambleText text="Desenvolvimento" continuous={false} /></h3>
               <div className="flex flex-wrap gap-3">
                 {['Lógica de Programação', 'Estrutura de Dados', 'SQL', 'Python', 'Next.js'].map((skill) => (
                   <span key={skill} className="px-4 py-2 bg-white/5 text-sm font-mono text-gray-300 rounded-full border border-white/10">
@@ -773,7 +718,7 @@ export default function App() {
                   <Server className="w-12 h-12 text-neon-green mb-6 drop-shadow-[0_0_8px_rgba(0,255,0,0.5)] group-hover:scale-125 group-hover:-rotate-12 group-hover:drop-shadow-[0_0_20px_rgba(0,255,0,1)] transition-all duration-300" />
                 </motion.div>
               </motion.div>
-              <h3 className="text-2xl font-bold mb-6"><ScrambleText text="Infraestrutura e TI" continuous={true} /></h3>
+              <h3 className="text-2xl font-bold mb-6"><ScrambleText text="Infraestrutura e TI" continuous={false} /></h3>
               <div className="flex flex-wrap gap-3">
                 {['Montagem e Manutenção', 'Diagnóstico de Hardware', 'Redes Locais', 'Wi-Fi e Roteadores', 'Suporte Técnico Presencial', 'Resolução de Conectividade'].map((skill) => (
                   <span key={skill} className="px-4 py-2 bg-white/5 text-sm font-mono text-gray-300 rounded-full border border-white/10">
@@ -805,7 +750,7 @@ export default function App() {
                   <Video className="w-12 h-12 text-neon-green mb-6 drop-shadow-[0_0_8px_rgba(0,255,0,0.5)] group-hover:scale-125 group-hover:rotate-6 group-hover:drop-shadow-[0_0_20px_rgba(0,255,0,1)] transition-all duration-300" />
                 </motion.div>
               </motion.div>
-              <h3 className="text-2xl font-bold mb-6"><ScrambleText text="Audiovisual" continuous={true} /></h3>
+              <h3 className="text-2xl font-bold mb-6"><ScrambleText text="Audiovisual" continuous={false} /></h3>
               <div className="flex flex-wrap gap-3">
                 {['Edição Profissional', 'YouTube', 'Ritmos de Corte', 'Engajamento', 'Criação de Conteúdo', 'Pós-produção'].map((skill) => (
                   <span key={skill} className="px-4 py-2 bg-white/5 text-sm font-mono text-gray-300 rounded-full border border-white/10">
