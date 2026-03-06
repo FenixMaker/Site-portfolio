@@ -73,7 +73,7 @@ const portfolioProjects = [
 
 const categories = ['Todos', 'Sistemas & Automação', 'Audiovisual', 'Hardware & Redes'];
 
-const MatrixRain = () => {
+const MatrixRain = React.memo(() => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -113,7 +113,7 @@ const MatrixRain = () => {
 
       yPositions.forEach((y, index) => {
         // Reduzir probabilidade de queda em mobile para menos atualizações de texto
-        if (isMobile && Math.random() > 0.5) return;
+        if (isMobile && Math.random() > 0.8) return; // Aumentei a restrição em mobile
 
         const text = String.fromCharCode(0x30A0 + Math.random() * 96);
         const x = index * (fontSize * 1.5);
@@ -130,9 +130,14 @@ const MatrixRain = () => {
     // Iniciar animação
     animationFrameId = requestAnimationFrame(matrix);
 
+    // Debounce no resize
+    let resizeTimeout: NodeJS.Timeout;
     const handleResize = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      }, 200);
     };
     
     // Performance: Pausar quando não estiver visível
@@ -150,13 +155,14 @@ const MatrixRain = () => {
     
     return () => {
       cancelAnimationFrame(animationFrameId);
+      clearTimeout(resizeTimeout);
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
   return <canvas ref={canvasRef} className="fixed inset-0 z-[-1] opacity-5 pointer-events-none" />;
-};
+});
 
 const MiniMatrixRain = () => null;
 
@@ -255,6 +261,9 @@ const ProjectCard = ({ project, index }: { project: any; index: number; key?: Re
   const scrollTranslateY = useTransform(scrollYProgress, [0, 1], [-30, 30]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Desativar efeito de mouse em dispositivos móveis/touch para performance
+    if (window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768) return;
+
     const rect = e.currentTarget.getBoundingClientRect();
     const width = rect.width;
     const height = rect.height;
@@ -394,8 +403,13 @@ export default function App() {
 
   // Efeito para mudar o estilo do header ao rolar a página e Scroll-Spy
   useEffect(() => {
+    let scrollTimeout: NodeJS.Timeout | null = null;
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+      if (scrollTimeout) return;
+      scrollTimeout = setTimeout(() => {
+        setScrolled(window.scrollY > 50);
+        scrollTimeout = null;
+      }, 100);
     };
     window.addEventListener('scroll', handleScroll);
 
