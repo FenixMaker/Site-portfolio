@@ -50,6 +50,15 @@ const ProjectCard = ({ project, index }: { project: any; index: number; key?: Re
     translateY: mouseTranslateY 
   } : {};
 
+  const link = typeof project.link === 'string' ? project.link.trim() : '';
+  const hasValidLink = link !== '' && link !== '#';
+  const isExternalLink = hasValidLink && link.startsWith('http');
+  const isPrivateRepo = project.privateRepo === true;
+  const ctaLabel = typeof project.ctaLabel === 'string' ? project.ctaLabel : 'Ver Detalhes';
+  const secondaryLink = typeof project.secondaryLink === 'string' ? project.secondaryLink.trim() : '';
+  const hasSecondaryLink = secondaryLink !== '' && secondaryLink !== '#';
+  const secondaryLabel = typeof project.secondaryLabel === 'string' ? project.secondaryLabel : 'Ver Documentacao';
+
   return (
     <m.div
       ref={ref}
@@ -101,13 +110,20 @@ const ProjectCard = ({ project, index }: { project: any; index: number; key?: Re
         </span>
         <h3 className="text-xl font-bold mb-3 group-hover:text-neon-green transition-colors flex items-center gap-2">
           {project.title}
-          {project.link !== '#' && project.type !== 'video' && (
+          {hasValidLink && project.type !== 'video' && (
             <ExternalLink size={18} className="text-gray-500 group-hover:text-neon-green transition-colors" />
           )}
         </h3>
         <p className="text-gray-400 text-sm mb-4 flex-grow">
           {project.description}
         </p>
+
+        {project.demoLogin && project.demoPassword && (
+          <div className="mb-4 rounded border border-neon-green/30 bg-neon-green/5 p-3 text-xs font-mono text-gray-300">
+            <p>Login: {project.demoLogin}</p>
+            <p>Senha: {project.demoPassword}</p>
+          </div>
+        )}
         
         {project.tech && (
           <div className="flex flex-wrap gap-2 mb-6">
@@ -119,15 +135,38 @@ const ProjectCard = ({ project, index }: { project: any; index: number; key?: Re
           </div>
         )}
 
-        {project.type !== 'video' ? (
+        {project.type !== 'video' && hasValidLink ? (
+          <div className="mt-auto flex flex-wrap items-center gap-4">
+            <a
+              href={link}
+              target={isExternalLink ? "_blank" : undefined}
+              rel={isExternalLink ? "noopener noreferrer" : undefined}
+              className="inline-flex items-center gap-2 text-sm font-mono text-white hover:text-neon-green transition-colors"
+            >
+              {ctaLabel} <ExternalLink size={16} />
+            </a>
+            {hasSecondaryLink && (
+              <a
+                href={secondaryLink}
+                target={secondaryLink.startsWith('http') ? "_blank" : undefined}
+                rel={secondaryLink.startsWith('http') ? "noopener noreferrer" : undefined}
+                className="inline-flex items-center gap-2 text-sm font-mono text-gray-300 hover:text-neon-green transition-colors"
+              >
+                {secondaryLabel} <ExternalLink size={16} />
+              </a>
+            )}
+          </div>
+        ) : project.type !== 'video' && isPrivateRepo ? (
           <a
-            href={project.link}
-            target={project.link.startsWith('http') ? "_blank" : undefined}
-            rel={project.link.startsWith('http') ? "noopener noreferrer" : undefined}
-            className="inline-flex items-center gap-2 text-sm font-mono text-white hover:text-neon-green transition-colors mt-auto"
+            href="#contact"
+            className="inline-flex items-center gap-2 text-sm font-mono text-neon-green hover:text-white transition-colors mt-auto"
           >
-            Ver Detalhes <ExternalLink size={16} />
+            Repositório Privado (solicitar acesso)
           </a>
+        ) : project.type !== 'video' ? (
+          <span className="inline-flex items-center gap-2 text-sm font-mono text-gray-500 mt-auto">
+            Detalhes em breve
+          </span>
         ) : (
           <a
             href={project.link}

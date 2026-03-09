@@ -11,7 +11,12 @@ const portfolioProjects = [
     category: 'Sistemas & Automação',
     description: 'Sistema completo de gestão para restaurantes, controle de pedidos e estoque.',
     image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=600&h=400',
-    link: '#',
+    link: 'https://bytegreen.netlify.app/',
+    ctaLabel: 'Acessar Demo',
+    secondaryLink: 'https://github.com/Fenixposts2/Sistema-Restaurante',
+    secondaryLabel: 'Ver Documentacao',
+    demoLogin: 'admin@bytegreen.com',
+    demoPassword: 'admin123',
     tech: ['Python', 'CustomTkinter', 'SQLite']
   },
   {
