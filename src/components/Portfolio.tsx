@@ -62,19 +62,25 @@ const portfolioProjects = [
     id: 9,
     title: 'Montagem de PC High-End',
     category: 'Hardware & Redes',
-    description: 'Case de montagem de computador focado em performance e cable management.',
+    description: 'Projeto de construção customizado de computador focado em performance gaming/workstation, com ênfase em cable management e cooling otimizado.',
     image: 'https://images.unsplash.com/photo-1587202372634-32705e3bf49c?auto=format&fit=crop&q=80&w=600&h=400',
-    link: '#',
-    tech: ['Hardware', 'Cable Management', 'Overclock']
+    link: 'https://www.youtube.com/@FenixPosts',
+    ctaLabel: 'Assista na Playlist',
+    secondaryLink: 'https://github.com/FenixMaker',
+    secondaryLabel: 'Ver Projetos',
+    tech: ['Hardware', 'Cable Management', 'Modding']
   },
   {
     id: 10,
     title: 'Setup de Rede Local',
     category: 'Hardware & Redes',
-    description: 'Configuração de rede estruturada, roteamento e otimização de Wi-Fi.',
+    description: 'Configuração profissional de rede estruturada, roteamento mesh, otimização de Wi-Fi 6 e gerenciamento de bandwidth. Suporte a VPN e segurança de tráfego.',
     image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&q=80&w=600&h=400',
-    link: '#',
-    tech: ['Redes', 'Roteadores', 'Infraestrutura']
+    link: 'https://www.youtube.com/@FenixPosts',
+    ctaLabel: 'Ver Tutoriais',
+    secondaryLink: 'https://github.com/FenixMaker',
+    secondaryLabel: 'Configs e Scripts',
+    tech: ['Networking', 'Wi-Fi 6', 'VPN', 'Roteamento']
   },
 ];
 

@@ -1,9 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { m } from 'motion/react';
-import { Mail, MapPin, Github, Linkedin, Youtube } from 'lucide-react';
+import { Mail, MapPin, Github, Linkedin, Youtube, CheckCircle } from 'lucide-react';
 import ScrambleText from './ScrambleText';
 
 const Contact = () => {
+  const [emailCopied, setEmailCopied] = useState(false);
+
+  const handleCopyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText('Fenixposts@gmail.com');
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    } catch (err) {
+      console.error('Falha ao copiar email:', err);
+    }
+  };
   return (
     <footer id="contato" className="py-16 md:py-24 relative border-t border-white/10">
       <div className="max-w-4xl mx-auto px-6 md:px-12 text-center">
@@ -22,10 +33,28 @@ const Contact = () => {
 
           <a
             href="mailto:Fenixposts@gmail.com"
-            className="inline-flex px-8 py-4 bg-neon-green text-black font-bold text-lg hover:bg-white transition-colors duration-300 mb-16 w-full sm:w-auto justify-center"
+            className="inline-flex px-8 py-4 bg-neon-green text-black font-bold text-lg hover:bg-white transition-all duration-300 mb-16 w-full sm:w-auto justify-center relative group"
           >
-            Diga Olá
+            <span>Diga Olá</span>
+            {emailCopied && (
+              <m.span
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="absolute right-3 text-green-900 flex items-center gap-1"
+              >
+                <CheckCircle size={16} /> Email copiado!
+              </m.span>
+            )}
           </a>
+          <button
+            type="button"
+            onClick={handleCopyEmail}
+            className="ml-2 px-4 py-4 border border-neon-green/50 text-neon-green font-mono text-sm hover:bg-neon-green/10 transition-colors duration-300 mb-16"
+            aria-label="Copiar email"
+          >
+            {emailCopied ? 'Copiado!' : 'Copiar Email'}
+          </button>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-16 text-left max-w-2xl mx-auto">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-dark-surface p-6 border border-white/5">

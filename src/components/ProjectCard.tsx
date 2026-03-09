@@ -1,11 +1,122 @@
-import React, { useRef } from 'react';
-import { ExternalLink, Youtube } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { ExternalLink, X, Youtube } from 'lucide-react';
 import { m, useMotionValue, useSpring, useTransform, useScroll } from 'motion/react';
+import { createPortal } from 'react-dom';
+
+const renderMarkdownBlocks = (content: string) => {
+  const lines = content.split('\n');
+  const blocks: React.ReactNode[] = [];
+  let inCode = false;
+  let codeBuffer: string[] = [];
+  let listBuffer: string[] = [];
+  let key = 0;
+
+  const flushList = () => {
+    if (!listBuffer.length) return;
+    blocks.push(
+      <ul key={`list-${key++}`} className="list-disc space-y-1 pl-6 text-gray-200">
+        {listBuffer.map((item, idx) => (
+          <li key={`li-${idx}`}>{item}</li>
+        ))}
+      </ul>
+    );
+    listBuffer = [];
+  };
+
+  const flushCode = () => {
+    if (!codeBuffer.length) return;
+    blocks.push(
+      <pre
+        key={`code-${key++}`}
+        className="overflow-x-auto rounded-md border border-white/20 bg-black/70 p-4 text-xs text-neon-green"
+      >
+        <code>{codeBuffer.join('\n')}</code>
+      </pre>
+    );
+    codeBuffer = [];
+  };
+
+  lines.forEach((rawLine) => {
+    const line = rawLine.trimEnd();
+
+    if (line.startsWith('```')) {
+      if (inCode) {
+        flushCode();
+        inCode = false;
+      } else {
+        flushList();
+        inCode = true;
+      }
+      return;
+    }
+
+    if (inCode) {
+      codeBuffer.push(rawLine);
+      return;
+    }
+
+    if (!line) {
+      flushList();
+      blocks.push(<div key={`space-${key++}`} className="h-2" />);
+      return;
+    }
+
+    if (line.startsWith('- ') || line.startsWith('* ')) {
+      listBuffer.push(line.slice(2));
+      return;
+    }
+
+    flushList();
+
+    if (line.startsWith('### ')) {
+      blocks.push(
+        <h3 key={`h3-${key++}`} className="mt-2 text-lg font-bold text-neon-green">
+          {line.slice(4)}
+        </h3>
+      );
+      return;
+    }
+
+    if (line.startsWith('## ')) {
+      blocks.push(
+        <h2 key={`h2-${key++}`} className="mt-4 text-xl font-bold text-white">
+          {line.slice(3)}
+        </h2>
+      );
+      return;
+    }
+
+    if (line.startsWith('# ')) {
+      blocks.push(
+        <h1 key={`h1-${key++}`} className="mt-4 text-2xl font-bold text-white">
+          {line.slice(2)}
+        </h1>
+      );
+      return;
+    }
+
+    blocks.push(
+      <p key={`p-${key++}`} className="leading-relaxed text-gray-200">
+        {line}
+      </p>
+    );
+  });
+
+  flushList();
+  flushCode();
+
+  return blocks;
+};
 
 const ProjectCard = ({ project, index }: { project: any; index: number; key?: React.Key }) => {
   const ref = useRef<HTMLDivElement>(null);
+  const docCacheRef = useRef<Record<string, string>>({});
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+  const [isDocModalOpen, setIsDocModalOpen] = useState(false);
+  const [docContent, setDocContent] = useState('');
+  const [docLoading, setDocLoading] = useState(false);
+  const [docError, setDocError] = useState('');
   
   // Otimização: Detectar mobile para desativar efeitos pesados
   const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches);
@@ -58,6 +169,84 @@ const ProjectCard = ({ project, index }: { project: any; index: number; key?: Re
   const secondaryLink = typeof project.secondaryLink === 'string' ? project.secondaryLink.trim() : '';
   const hasSecondaryLink = secondaryLink !== '' && secondaryLink !== '#';
   const secondaryLabel = typeof project.secondaryLabel === 'string' ? project.secondaryLabel : 'Ver Documentacao';
+  const isMainMarkdownLink = hasValidLink && /\.md($|\?|#)/i.test(link);
+  const isSecondaryMarkdownLink = hasSecondaryLink && /\.md($|\?|#)/i.test(secondaryLink);
+
+  const openMarkdownModal = async (docUrl: string) => {
+    setIsDocModalOpen(true);
+    setDocError('');
+
+    if (docCacheRef.current[docUrl]) {
+      setDocContent(docCacheRef.current[docUrl]);
+      return;
+    }
+
+    setDocLoading(true);
+    try {
+      const res = await fetch(docUrl);
+      if (!res.ok) {
+        throw new Error(`Falha ao carregar documento (${res.status}).`);
+      }
+      const text = await res.text();
+      docCacheRef.current[docUrl] = text;
+      setDocContent(text);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Nao foi possivel carregar o documento.';
+      setDocError(message);
+    } finally {
+      setDocLoading(false);
+    }
+  };
+
+  const closeDocModal = () => setIsDocModalOpen(false);
+
+  const handleEscapeKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') closeDocModal();
+  };
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) closeDocModal();
+  };
+
+  const modalContent = isDocModalOpen ? (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+      onClick={handleBackdropClick}
+      onKeyDown={handleEscapeKey}
+      role="presentation"
+    >
+      <div
+        className="relative w-full max-w-4xl rounded-xl border border-neon-green/40 bg-dark-surface shadow-[0_0_40px_rgba(0,255,0,0.15)]"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="doc-modal-title"
+      >
+        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+          <h4 id="doc-modal-title" className="text-sm font-mono uppercase tracking-wider text-neon-green">
+            Documentacao do Projeto
+          </h4>
+          <button
+            type="button"
+            onClick={closeDocModal}
+            className="rounded border border-white/20 p-2 text-gray-300 transition-colors hover:border-neon-green hover:text-neon-green"
+            aria-label="Fechar documentação"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="max-h-[75vh] overflow-y-auto px-5 py-4">
+          {docLoading && <p className="font-mono text-sm text-gray-300">Carregando documento...</p>}
+          {!docLoading && docError && <p className="font-mono text-sm text-red-400">{docError}</p>}
+          {!docLoading && !docError && (
+            <div className="space-y-2 text-sm">
+              {renderMarkdownBlocks(docContent)}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  ) : null;
 
   return (
     <m.div
@@ -137,23 +326,43 @@ const ProjectCard = ({ project, index }: { project: any; index: number; key?: Re
 
         {project.type !== 'video' && hasValidLink ? (
           <div className="mt-auto flex flex-wrap items-center gap-4">
-            <a
-              href={link}
-              target={isExternalLink ? "_blank" : undefined}
-              rel={isExternalLink ? "noopener noreferrer" : undefined}
-              className="inline-flex items-center gap-2 text-sm font-mono text-white hover:text-neon-green transition-colors"
-            >
-              {ctaLabel} <ExternalLink size={16} />
-            </a>
-            {hasSecondaryLink && (
-              <a
-                href={secondaryLink}
-                target={secondaryLink.startsWith('http') ? "_blank" : undefined}
-                rel={secondaryLink.startsWith('http') ? "noopener noreferrer" : undefined}
-                className="inline-flex items-center gap-2 text-sm font-mono text-gray-300 hover:text-neon-green transition-colors"
+            {isMainMarkdownLink ? (
+              <button
+                type="button"
+                onClick={() => openMarkdownModal(link)}
+                className="inline-flex items-center gap-2 text-sm font-mono text-white hover:text-neon-green transition-colors"
               >
-                {secondaryLabel} <ExternalLink size={16} />
+                {ctaLabel} <ExternalLink size={16} />
+              </button>
+            ) : (
+              <a
+                href={link}
+                target={isExternalLink ? "_blank" : undefined}
+                rel={isExternalLink ? "noopener noreferrer" : undefined}
+                className="inline-flex items-center gap-2 text-sm font-mono text-white hover:text-neon-green transition-colors"
+              >
+                {ctaLabel} <ExternalLink size={16} />
               </a>
+            )}
+            {hasSecondaryLink && (
+              isSecondaryMarkdownLink ? (
+                <button
+                  type="button"
+                  onClick={() => openMarkdownModal(secondaryLink)}
+                  className="inline-flex items-center gap-2 text-sm font-mono text-gray-300 hover:text-neon-green transition-colors"
+                >
+                  {secondaryLabel} <ExternalLink size={16} />
+                </button>
+              ) : (
+                <a
+                  href={secondaryLink}
+                  target={secondaryLink.startsWith('http') ? "_blank" : undefined}
+                  rel={secondaryLink.startsWith('http') ? "noopener noreferrer" : undefined}
+                  className="inline-flex items-center gap-2 text-sm font-mono text-gray-300 hover:text-neon-green transition-colors"
+                >
+                  {secondaryLabel} <ExternalLink size={16} />
+                </a>
+              )
             )}
           </div>
         ) : project.type !== 'video' && isPrivateRepo ? (
@@ -178,6 +387,8 @@ const ProjectCard = ({ project, index }: { project: any; index: number; key?: Re
           </a>
         )}
       </div>
+
+      {modalContent && createPortal(modalContent, document.body)}
     </m.div>
   );
 };
