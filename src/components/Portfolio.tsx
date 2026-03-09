@@ -11,12 +11,8 @@ const portfolioProjects = [
     category: 'Sistemas & Automação',
     description: 'Sistema completo de gestão para restaurantes, controle de pedidos e estoque.',
     image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=600&h=400',
-    link: 'https://bytegreen.netlify.app/',
-    ctaLabel: 'Acessar Demo',
-    secondaryLink: 'https://github.com/Fenixposts2/Sistema-Restaurante',
-    secondaryLabel: 'Ver Documentacao',
-    demoLogin: 'admin@bytegreen.com',
-    demoPassword: 'admin123',
+    link: '/docs/PROJECT_COMPLETE.md',
+    ctaLabel: 'Ler Documentacao (.md)',
     tech: ['Python', 'CustomTkinter', 'SQLite']
   },
   {
@@ -34,7 +30,12 @@ const portfolioProjects = [
     category: 'Sistemas & Automação',
     description: 'Aplicação web para gestão médica sustentável. Monitora consumo energético de equipamentos e gerencia dados com conformidade LGPD.',
     image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=600&h=400',
-    link: 'https://github.com/FenixMaker/bytegreen-medical',
+    link: 'https://bytegreen.netlify.app/',
+    ctaLabel: 'Acessar Site',
+    secondaryLink: 'https://github.com/FenixMaker/bytegreen-medical',
+    secondaryLabel: 'Ver Repositorio',
+    demoLogin: 'admin@bytegreen.com',
+    demoPassword: 'admin123',
     tech: ['Next.js', 'TypeScript', 'Tailwind', 'Recharts']
   },
   {
